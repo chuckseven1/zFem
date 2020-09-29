@@ -1,0 +1,30 @@
+{
+  "name": "zfem",
+  "productName": "zFem",
+  "description": "zEdit UPF patcher to feminize leveled NPCs",
+  "version": "1.0.0",
+  "author": "chuck",
+  "copyright": "© 2020, chuck",
+  "repository": "https://github.com/chuckseven1/zFem",
+  "license": "MIT",
+  "prettier": {
+    "singleQuote": true,
+    "quoteProps": "consistent"
+  },
+  "scripts": {
+    "build": "gulp build",
+    "release": "gulp release"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/xelib": "^0.6.0",
+    "@types/zedit__upf": "^2.0.0",
+    "angular": "^1.6.6",
+    "gulp": "^4.0.0",
+    "gulp-clean": "^0.3.2",
+    "gulp-rename": "^1.2.2",
+    "gulp-typescript": "^6.0.0-alpha.1",
+    "gulp-zip": "^4.1.0",
+    "typescript": "^4.0.2"
+  }
+}

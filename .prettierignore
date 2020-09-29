@@ -1,0 +1,8 @@
+LICENSE
+
+# Ignore compiled TS output
+dist
+*.zip
+
+yarn.lock
+tags*

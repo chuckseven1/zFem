@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2019",
+    "strict": true,
+    "moduleResolution": "node",
+    "module": "none",
+    "esModuleInterop": false,
+    "lib": ["ES2019", "dom"],
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitAny": true,
+    "rootDir": "src",
+    "outDir": "lib",
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "stripInternal": true
+  },
+  "exclude": ["lib"]
+}
