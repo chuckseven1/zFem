@@ -150,12 +150,66 @@ registerPatcher<Locals, Settings>({
       return ret;
     }
 
+    // Mostly a duplicate of lvlnGenderBeforePatching
+    // Changed case ´LVLN´ to support dry-running removals
+    function lvlnGenderAfterPatching(record) {
+      const cur = xelib.GetWinningOverride(record);
+      // Memoize by LongName
+      const id = xelib.LongName(record);
+      if (locals.postPatchmemos.has(id)) {
+        return locals.postPatchmemos.get(id);
+      }
+      
+      let ret;
+      // Generic bad response
+      ret = {
+        gender: settings.deFem ? ListGender.Female : ListGender.Male,
+        hasRaces: false
+      }
+      const signature = xelib.Signature(cur);
+      switch (signature) {
+        case 'LVLN':
+            const items = xelib.GetElements(cur, 'Leveled List Entries');
+            for (const item of items) {
+              const ref = xelib.GetLinksTo(item, 'LVLO\\Reference');
+              if (!ref) {
+                continue;
+              }
+              const { gender, hasRaces } = lvlnGenderAfterPatching(ref);
+              if (gender ===
+                (settings.deFem ? ListGender.Male : ListGender.Female) ||
+                !hasRaces) {
+                // Item of desired gender or not a race of interest
+                ret = {
+                  gender: gender,
+                  hasRaces: hasRaces
+                };
+                break;
+              }
+              ret = { gender: gender, hasRaces: hasRaces };
+            }
+            break;
+        case 'NPC_':
+          const race = xelib.GetLinksTo(cur, 'RNAM');
+          ret = {
+            gender: xelib.GetIsFemale(cur) ? ListGender.Female : ListGender.Male,
+            hasRaces: settings.races.lastIndexOf(xelib.EditorID(race)) >= 0
+          };
+          break;
+        default:
+          throw Error('Unexpect record type in leveled list');
+      }
+      locals.postPatchmemos.set(id, ret);
+      return ret;
+    }
+
     return {
       initialize() {
         /**
          * Used for memoizing lvlnGender
          */
         locals.memos = new Map();
+        locals.postPatchmemos = new Map();
       },
       process: [
         {
@@ -176,6 +230,10 @@ registerPatcher<Locals, Settings>({
           patch(record) {
             const lvln = xelib.GetWinningOverride(record);
             helpers.logMessage(`Patching ${xelib.LongName(lvln)}`);
+            if (lvlnGenderAfterPatching(lvln).gender === (settings.deFem ? ListGender.Female : ListGender.Male)) {
+              helpers.logMessage(`Skipping ${xelib.LongName(lvln)} because it would otherwise become empty.`);
+              return;
+            }
             // @ts-ignore
             const items = xelib.GetElements(lvln, 'Leveled List Entries');
             for (const item of items) {
@@ -184,7 +242,7 @@ registerPatcher<Locals, Settings>({
                 // TODO: Remove the NULLs or ignore them? IDK
                 continue;
               }
-              const { gender, hasRaces } = lvlnGender(ref);
+              const { gender, hasRaces } = lvlnGenderAfterPatching(ref);
               if (
                 gender ===
                   (settings.deFem ? ListGender.Male : ListGender.Female) ||
